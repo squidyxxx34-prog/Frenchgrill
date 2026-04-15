@@ -1,3 +1,496 @@
-<script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
-<script src="https://files.bpcontent.cloud/2026/03/30/09/20260330092148-H05BF7B2.js" defer></script>
-    
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prospect Hunter</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07070b;
+  --s1: #0d0d14;
+  --s2: #111119;
+  --b1: #1a1a28;
+  --b2: #252538;
+  --text: #ddddf0;
+  --muted: #484860;
+  --hot: #00ffaa;
+  --warm: #ffcc44;
+  --cold: #ff4477;
+  --reddit: #ff6633;
+  --tw: #44aaff;
+  --purple: #9b7fe8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;overflow-x:hidden;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 80% 50% at 10% 0%,#9b7fe810 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 90% 100%,#00ffaa08 0%,transparent 60%);}
+
+#app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+
+header{padding:18px 36px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:14px;backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;background:#07070bcc;}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,var(--hot),var(--tw));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.logo-t{font-size:17px;font-weight:800;letter-spacing:.08em;color:#fff;}
+.logo-s{font-size:9px;color:var(--muted);letter-spacing:.3em;font-family:'Space Mono',monospace;}
+.hbadges{margin-left:auto;display:flex;gap:6px;}
+.hb{padding:3px 9px;border-radius:3px;font-size:9px;font-family:'Space Mono',monospace;letter-spacing:.1em;border:1px solid;}
+.hb-r{color:var(--reddit);border-color:#ff663333;}
+.hb-x{color:var(--tw);border-color:#44aaff33;}
+.hb-g{color:var(--hot);border-color:#00ffaa33;}
+
+main{display:grid;grid-template-columns:1fr 300px;flex:1;}
+.left{padding:36px;border-right:1px solid var(--b1);}
+
+.step{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:26px;margin-bottom:20px;transition:border-color .3s;}
+.step-num{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.2em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.step-num .n{width:20px;height:20px;border-radius:50%;background:var(--b2);display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;}
+.step-num.done .n{background:var(--hot);color:#000;}
+
+input[type=text]{background:var(--bg);border:1px solid var(--b2);border-radius:8px;padding:13px 16px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;}
+input:focus{border-color:var(--purple);box-shadow:0 0 0 3px #9b7fe812;}
+input::placeholder{color:var(--muted);}
+.row{display:flex;gap:10px;}
+
+.btn-primary{padding:13px 28px;background:linear-gradient(135deg,var(--hot),var(--tw));border:none;border-radius:8px;color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;letter-spacing:.1em;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px #00ffaa20;}
+.btn-primary:disabled{background:var(--s2);color:var(--muted);transform:none;box-shadow:none;cursor:not-allowed;}
+
+.btn-ghost{padding:11px 20px;background:transparent;border:1px solid var(--purple);border-radius:8px;color:var(--purple);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.btn-ghost:hover{background:#9b7fe814;}
+.btn-ghost:disabled{opacity:.4;cursor:not-allowed;}
+
+#prod-card{display:none;margin-top:14px;background:linear-gradient(135deg,#0d0d1c,#111120);border:1px solid #9b7fe840;border-radius:10px;padding:16px 18px;}
+#prod-card .pname{font-size:16px;font-weight:700;color:#c8b0ff;margin-bottom:6px;}
+#prod-card .pdesc{font-size:13px;color:var(--muted);line-height:1.6;}
+
+#kw-wrap{display:none;margin-bottom:20px;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:16px 18px;gap:20px;flex-wrap:wrap;}
+.kw-grp label{font-size:9px;font-family:'Space Mono',monospace;letter-spacing:.2em;color:var(--muted);display:block;margin-bottom:7px;}
+.kws{display:flex;gap:6px;flex-wrap:wrap;}
+.kw{padding:3px 9px;border-radius:4px;font-size:11px;font-family:'Space Mono',monospace;}
+.kw-r{background:#ff663315;border:1px solid #ff663340;color:var(--reddit);}
+.kw-x{background:#44aaff15;border:1px solid #44aaff40;color:var(--tw);}
+
+#filters-bar{display:none;align-items:center;gap:7px;margin-bottom:16px;flex-wrap:wrap;}
+.fb{padding:5px 13px;background:transparent;border:1px solid var(--b2);border-radius:4px;color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;cursor:pointer;transition:all .15s;}
+.fb.on{background:var(--s2);border-color:var(--b2);color:var(--text);}
+#csv-btn{margin-left:auto;padding:5px 13px;background:transparent;border:1px solid #00ffaa44;border-radius:4px;color:var(--hot);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;cursor:pointer;}
+#csv-btn:hover{background:#00ffaa10;}
+
+#results{display:flex;flex-direction:column;gap:10px;}
+.empty{text-align:center;padding:80px 40px;border:1px dashed #15152a;border-radius:12px;color:#1e1e30;}
+.empty-ico{font-size:48px;margin-bottom:14px;opacity:.2;}
+.empty p{font-size:12px;letter-spacing:.2em;font-family:'Space Mono',monospace;}
+
+.card{background:var(--s1);border-radius:10px;padding:16px 20px;border:1px solid var(--b1);border-left:3px solid;transition:transform .15s;animation:si .3s ease;}
+.card:hover{transform:translateX(2px);}
+.card.hot{border-left-color:var(--hot);border-color:#00ffaa1a;}
+.card.warm{border-left-color:var(--warm);border-color:#ffcc441a;}
+.card.cold{border-left-color:var(--cold);}
+@keyframes si{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.ctop{display:flex;align-items:flex-start;gap:12px;}
+.sbadge{min-width:42px;height:42px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:19px;font-weight:700;flex-shrink:0;}
+.sbadge.hot{background:#00ffaa15;color:var(--hot);}
+.sbadge.warm{background:#ffcc4415;color:var(--warm);}
+.sbadge.cold{background:#ff447715;color:var(--cold);}
+.cbody{flex:1;min-width:0;}
+.cmeta{display:flex;align-items:center;gap:7px;margin-bottom:4px;flex-wrap:wrap;}
+.stag{font-size:9px;font-family:'Space Mono',monospace;letter-spacing:.15em;padding:2px 7px;border-radius:3px;border:1px solid;}
+.stag-r{color:var(--reddit);border-color:#ff663340;background:#ff663310;}
+.stag-x{color:var(--tw);border-color:#44aaff40;background:#44aaff10;}
+.sub{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+.aut{font-size:12px;color:#666;}
+.ilabel{margin-left:auto;font-size:11px;}
+.ctitle{font-size:13px;color:#ddd;margin-bottom:5px;line-height:1.4;font-weight:600;}
+.ctext{font-size:12px;color:#555;margin-bottom:7px;line-height:1.4;}
+.cfoot{display:flex;align-items:center;}
+.creason{font-size:11px;color:var(--muted);font-style:italic;}
+.clink{margin-left:auto;font-size:10px;font-family:'Space Mono',monospace;letter-spacing:.15em;color:#2a2a3a;text-decoration:none;transition:color .2s;}
+.clink:hover{color:var(--hot);}
+
+.right{background:#050508;border-left:1px solid var(--b1);display:flex;flex-direction:column;padding:24px 20px;}
+.term-lbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.3em;margin-bottom:14px;}
+#terminal{flex:1;overflow-y:auto;font-family:'Space Mono',monospace;font-size:11px;line-height:1.9;color:#2a2a40;}
+#terminal::-webkit-scrollbar{width:3px;}
+#terminal::-webkit-scrollbar-thumb{background:#1a1a2a;border-radius:2px;}
+.ll{display:block;}
+.li{color:#44aaff66;}
+.lo{color:var(--hot);}
+.la{color:#ffcc4466;}
+.lp{color:#9b7fe877;}
+.le{color:#ff447766;}
+.lc{color:#1a1a30;animation:bl 1s step-end infinite;}
+@keyframes bl{0%,100%{opacity:1;}50%{opacity:0;}}
+
+#stats{display:none;margin-top:20px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:16px;}
+.sr{display:flex;justify-content:space-between;margin-bottom:7px;}
+.sl{font-size:11px;color:#333;font-family:'Space Mono',monospace;}
+.sv{font-size:12px;font-weight:700;font-family:'Space Mono',monospace;}
+
+@media(max-width:768px){main{grid-template-columns:1fr;}.right{display:none;}.hbadges{display:none;}.left{padding:20px;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">🎯</div>
+    <div>
+      <div class="logo-t">PROSPECT HUNTER</div>
+      <div class="logo-s">REDDIT + X · GROQ · GRATUIT</div>
+    </div>
+    <div class="hbadges">
+      <span class="hb hb-r">REDDIT</span>
+      <span class="hb hb-x">X/TWITTER</span>
+      <span class="hb hb-g">GROQ FREE</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="left">
+
+      <div class="step" id="step1">
+        <div class="step-num" id="sn1"><span class="n">1</span> SITE WEB DU PRODUIT À VENDRE</div>
+        <div class="row">
+          <input type="text" id="url-input" placeholder="https://mon-produit.com" />
+          <button class="btn-ghost" id="analyze-btn" onclick="analyzeWebsite()">✦ ANALYSER</button>
+        </div>
+        <div id="prod-card">
+          <div class="pname" id="prod-name"></div>
+          <div class="pdesc" id="prod-desc"></div>
+        </div>
+      </div>
+
+      <div class="step" id="step2">
+        <div class="step-num" id="sn2"><span class="n">2</span> LANCER LA CHASSE</div>
+        <button class="btn-primary" id="hunt-btn" onclick="startHunt()" disabled style="width:100%;">
+          CHERCHER DES PROSPECTS →
+        </button>
+      </div>
+
+      <div id="kw-wrap"></div>
+
+      <div id="filters-bar">
+        <button class="fb on" onclick="setFilter('all')" data-f="all">TOUS (<span id="ca">0</span>)</button>
+        <button class="fb" onclick="setFilter('hot')" data-f="hot">🔥 CHAUD (<span id="ch">0</span>)</button>
+        <button class="fb" onclick="setFilter('warm')" data-f="warm">⚡ TIÈDE (<span id="cw">0</span>)</button>
+        <button class="fb" onclick="setFilter('cold')" data-f="cold">❄️ FROID (<span id="cc">0</span>)</button>
+        <button id="csv-btn" onclick="exportCSV()">↓ CSV</button>
+      </div>
+
+      <div id="results">
+        <div class="empty"><div class="empty-ico">🎯</div><p>ENTRE TON URL POUR COMMENCER</p></div>
+      </div>
+
+    </div>
+
+    <div class="right">
+      <div class="term-lbl">TERMINAL</div>
+      <div id="terminal"><span class="ll lc">> EN ATTENTE █</span></div>
+      <div id="stats">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.25em;margin-bottom:12px;">STATS</div>
+        <div class="sr"><span class="sl">Total</span><span class="sv" id="st" style="color:#666">0</span></div>
+        <div class="sr"><span class="sl">🔥 Chauds</span><span class="sv" id="sh" style="color:var(--hot)">0</span></div>
+        <div class="sr"><span class="sl">⚡ Tièdes</span><span class="sv" id="sw" style="color:var(--warm)">0</span></div>
+        <div class="sr"><span class="sl">❄️ Froids</span><span class="sv" id="sc" style="color:var(--cold)">0</span></div>
+        <div class="sr"><span class="sl">Score moy.</span><span class="sv" id="sa" style="color:#666">—</span></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  CLÉ GROQ — REMPLACE ICI
+const GROQ_KEY = "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";
+// ═══════════════════════════════════════════
+
+const NITTER = ['https://nitter.poast.org','https://nitter.privacydev.net','https://nitter.1d4.us'];
+let allResults = [];
+let currentFilter = 'all';
+let isRunning = false;
+let productData = null;
+
+function log(msg, cls='') {
+  const t = document.getElementById('terminal');
+  const c = t.querySelector('.lc');
+  const l = document.createElement('span');
+  l.className = 'll ' + cls;
+  l.textContent = '> ' + msg;
+  c ? t.insertBefore(l, c) : t.appendChild(l);
+  t.scrollTop = t.scrollHeight;
+}
+function clearLog() {
+  document.getElementById('terminal').innerHTML = '<span class="ll lc">> █</span>';
+}
+
+async function groq(system, user) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 900,
+      temperature: 0.3,
+      response_format: { type: 'json_object' },
+      messages: [{ role: 'system', content: system }, { role: 'user', content: user }]
+    })
+  });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error?.message || `Groq ${res.status}`); }
+  const d = await res.json();
+  const txt = d.choices?.[0]?.message?.content || '{}';
+  try { return JSON.parse(txt); } catch { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
+}
+
+async function analyzeWebsite() {
+  const url = document.getElementById('url-input').value.trim();
+  if (!url) return;
+  const btn = document.getElementById('analyze-btn');
+  btn.disabled = true; btn.textContent = '⏳...';
+  clearLog();
+  log('Récupération du site...', 'lp');
+
+  let siteText = '';
+  try {
+    const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(8000) });
+    const d = await r.json();
+    const tmp = document.createElement('div');
+    tmp.innerHTML = d.contents || '';
+    tmp.querySelectorAll('script,style,nav,footer,noscript').forEach(el => el.remove());
+    siteText = (tmp.innerText || tmp.textContent || '').replace(/\s+/g,' ').trim().slice(0, 4000);
+    log('Contenu extrait ✓', 'lo');
+  } catch {
+    log('Scraping impossible — analyse par URL', 'la');
+  }
+
+  log('Analyse IA...', 'lp');
+  try {
+    const result = await groq(
+      `Tu analyses un site web. Réponds en JSON:
+{
+  "name": "nom du produit",
+  "tagline": "accroche en 1 phrase",
+  "description": "description complète 2-3 phrases: ce que fait le produit, pour qui, bénéfice principal",
+  "target": "persona cible court",
+  "problem": "problème résolu en 1 phrase directe"
+}`,
+      `URL: ${url}\nContenu: ${siteText || '(non disponible, déduis depuis URL)'}`
+    );
+
+    productData = result;
+    document.getElementById('prod-name').textContent = result.name || 'Produit';
+    document.getElementById('prod-desc').textContent = result.description || result.tagline || '';
+    document.getElementById('prod-card').style.display = 'block';
+    document.getElementById('step1').style.borderColor = 'var(--hot)';
+    document.getElementById('sn1').classList.add('done');
+    document.getElementById('hunt-btn').disabled = false;
+    document.getElementById('step2').style.borderColor = 'var(--purple)';
+    log(`✅ "${result.name}"`, 'lo');
+    log(`Cible: ${result.target || '?'}`, 'lp');
+    log(`Problème: ${(result.problem||'').slice(0,55)}...`, 'lp');
+  } catch(e) {
+    log('⚠ ' + e.message, 'le');
+  }
+
+  btn.disabled = false; btn.textContent = '✦ ANALYSER';
+}
+
+async function generateKeywords() {
+  const p = productData;
+  return await groq(
+    `Génère mots-clés Reddit/Twitter pour trouver des prospects.
+JSON: {"reddit": ["kw1","kw2","kw3","kw4","kw5"], "twitter": ["kw1","kw2","kw3","kw4","kw5"]}`,
+    `Produit: "${p.name}"\nDescription: ${p.description}\nCible: ${p.target}\nProblème: ${p.problem}\nMélange français et anglais.`
+  );
+}
+
+async function searchReddit(kw) {
+  try {
+    const r = await fetch(`https://www.reddit.com/search.json?q=${encodeURIComponent(kw)}&sort=new&limit=8&t=month`, {
+      headers: { 'User-Agent': 'ProspectHunter/1.0' }
+    });
+    const d = await r.json();
+    return (d?.data?.children || []).map(c => ({
+      id: c.data.id, source: 'reddit',
+      author: c.data.author, title: c.data.title,
+      text: (c.data.selftext || '').slice(0, 300),
+      url: `https://reddit.com${c.data.permalink}`,
+      subreddit: c.data.subreddit,
+      score: null, intent: null, reason: null
+    }));
+  } catch { return []; }
+}
+
+async function searchNitter(kw) {
+  for (const inst of NITTER) {
+    try {
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(inst + '/search?q=' + encodeURIComponent(kw) + '&f=tweets')}`;
+      const r = await fetch(proxy, { signal: AbortSignal.timeout(6000) });
+      const d = await r.json();
+      const doc = new DOMParser().parseFromString(d.contents || '', 'text/html');
+      const tweets = [];
+      doc.querySelectorAll('.timeline-item').forEach((el, i) => {
+        if (i >= 6) return;
+        const author = el.querySelector('.username')?.textContent?.trim() || 'unknown';
+        const text = el.querySelector('.tweet-content')?.textContent?.trim() || '';
+        const link = el.querySelector('a.tweet-link')?.getAttribute('href') || '';
+        if (text) tweets.push({
+          id: `tw_${i}_${Date.now()}`, source: 'twitter', author,
+          title: text.slice(0, 90) + (text.length > 90 ? '…' : ''),
+          text: text.slice(0, 300),
+          url: link ? `https://twitter.com${link}` : '#',
+          subreddit: null, score: null, intent: null, reason: null
+        });
+      });
+      if (tweets.length) return tweets;
+    } catch { continue; }
+  }
+  return [];
+}
+
+async function scorePost(post) {
+  const p = productData;
+  return await groq(
+    `Score un post: intention d'achat pour ce produit.
+JSON: {"score": 7, "reason": "raison courte max 8 mots", "intent": "hot|warm|cold"}
+hot=cherche solution maintenant, warm=a le problème, cold=non pertinent`,
+    `Produit: "${p.name}" — ${p.description}\nProblème résolu: ${p.problem}\nCible: ${p.target}\n\nPost @${post.author}: "${post.title} ${post.text}"\nScore 1-10.`
+  );
+}
+
+async function startHunt() {
+  if (isRunning || !productData) return;
+  isRunning = true;
+  allResults = [];
+  document.getElementById('hunt-btn').disabled = true;
+  document.getElementById('hunt-btn').textContent = 'EN CHASSE...';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('filters-bar').style.display = 'none';
+  clearLog();
+
+  try {
+    log('Génération mots-clés...', 'la');
+    const kws = await generateKeywords();
+    log(`Reddit: ${kws.reddit.slice(0,3).join(', ')}`, 'lo');
+    log(`Twitter: ${kws.twitter.slice(0,3).join(', ')}`, 'lo');
+
+    const kw = document.getElementById('kw-wrap');
+    kw.style.display = 'flex';
+    kw.style.flexDirection = 'row';
+    kw.innerHTML = `
+      <div class="kw-grp"><label>REDDIT</label><div class="kws">${kws.reddit.map(k=>`<span class="kw kw-r">${k}</span>`).join('')}</div></div>
+      <div class="kw-grp"><label>TWITTER/X</label><div class="kws">${kws.twitter.map(k=>`<span class="kw kw-x">${k}</span>`).join('')}</div></div>
+    `;
+
+    const raw = [];
+    for (const kw of kws.reddit) {
+      log(`Reddit → "${kw}"`, 'li');
+      const p = await searchReddit(kw);
+      raw.push(...p);
+      log(`  ${p.length} posts`, 'lo');
+    }
+    for (const kw of kws.twitter.slice(0,2)) {
+      log(`Twitter → "${kw}"`, 'li');
+      const t = await searchNitter(kw);
+      raw.push(...t);
+      log(`  ${t.length} tweets`, 'lo');
+    }
+
+    const seen = new Set();
+    const unique = raw.filter(p => { if(seen.has(p.id)) return false; seen.add(p.id); return true; });
+    log(`${unique.length} uniques. Scoring...`, 'la');
+    document.getElementById('filters-bar').style.display = 'flex';
+
+    const toScore = unique.slice(0, 18);
+    for (let i = 0; i < toScore.length; i++) {
+      const p = toScore[i];
+      log(`Score ${i+1}/${toScore.length} @${p.author}`, 'la');
+      try {
+        const a = await scorePost(p);
+        p.score = a.score; p.intent = a.intent; p.reason = a.reason;
+      } catch {
+        p.score = 5; p.intent = 'warm'; p.reason = 'Scoring indisponible';
+      }
+      allResults = toScore.slice(0, i+1).sort((a,b)=>(b.score||0)-(a.score||0));
+      renderResults(); updateStats();
+    }
+    log(`✅ ${allResults.length} prospects !`, 'lo');
+  } catch(e) {
+    log('⚠ ' + e.message, 'le');
+  }
+
+  isRunning = false;
+  document.getElementById('hunt-btn').disabled = false;
+  document.getElementById('hunt-btn').textContent = 'RELANCER →';
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.fb').forEach(b => b.classList.toggle('on', b.dataset.f === f));
+  renderResults();
+}
+
+function renderResults() {
+  const list = currentFilter === 'all' ? allResults : allResults.filter(r => r.intent === currentFilter);
+  const c = document.getElementById('results');
+  if (!list.length) { c.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-family:\'Space Mono\',monospace;font-size:11px;">AUCUN RÉSULTAT</div>'; return; }
+  c.innerHTML = '';
+  list.forEach(r => {
+    const d = document.createElement('div');
+    d.className = `card ${r.intent||'cold'}`;
+    const ie = r.intent==='hot'?'🔥 Chaud':r.intent==='warm'?'⚡ Tiède':'❄️ Froid';
+    d.innerHTML = `
+      <div class="ctop">
+        <div class="sbadge ${r.intent||'cold'}">${r.score||'?'}</div>
+        <div class="cbody">
+          <div class="cmeta">
+            <span class="stag ${r.source==='reddit'?'stag-r':'stag-x'}">${r.source==='reddit'?'REDDIT':'X'}</span>
+            ${r.subreddit?`<span class="sub">r/${r.subreddit}</span>`:''}
+            <span class="aut">@${esc(r.author)}</span>
+            <span class="ilabel">${ie}</span>
+          </div>
+          <div class="ctitle">${esc(r.title)}</div>
+          ${r.text&&r.text!==r.title?`<div class="ctext">${esc(r.text.slice(0,140))}${r.text.length>140?'…':''}</div>`:''}
+          <div class="cfoot">
+            <span class="creason">${esc(r.reason||'')}</span>
+            <a href="${r.url}" target="_blank" rel="noreferrer" class="clink">VOIR →</a>
+          </div>
+        </div>
+      </div>`;
+    c.appendChild(d);
+  });
+}
+
+function updateStats() {
+  const h = allResults.filter(r=>r.intent==='hot').length;
+  const w = allResults.filter(r=>r.intent==='warm').length;
+  const co = allResults.filter(r=>r.intent==='cold').length;
+  const sc = allResults.filter(r=>r.score);
+  const avg = sc.length ? (sc.reduce((s,r)=>s+r.score,0)/sc.length).toFixed(1) : '—';
+  document.getElementById('ca').textContent = allResults.length;
+  document.getElementById('ch').textContent = h;
+  document.getElementById('cw').textContent = w;
+  document.getElementById('cc').textContent = co;
+  document.getElementById('st').textContent = allResults.length;
+  document.getElementById('sh').textContent = h;
+  document.getElementById('sw').textContent = w;
+  document.getElementById('sc').textContent = co;
+  document.getElementById('sa').textContent = avg + (avg!=='—'?'/10':'');
+  document.getElementById('stats').style.display = 'block';
+}
+
+function exportCSV() {
+  const rows = [['Source','Auteur','Titre','Score','Intention','Raison','URL']];
+  allResults.forEach(r => rows.push([r.source,r.author,`"${r.title}"`,r.score,r.intent,`"${r.reason}"`,r.url]));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}));
+  a.download = `prospects-${Date.now()}.csv`;
+  a.click();
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.getElementById('url-input').addEventListener('keydown', e => { if(e.key==='Enter') analyzeWebsite(); });
+</script>
+</body>
+</html>
